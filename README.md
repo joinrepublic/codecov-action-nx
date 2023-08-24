@@ -1,26 +1,11 @@
-# Codecov GitHub Action
+# Codecov GitHub Action for NX-based repos
 
 [![GitHub Marketplace](https://img.shields.io/badge/Marketplace-v3-undefined.svg?logo=github&logoColor=white&style=flat)](https://github.com/marketplace/actions/codecov)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcodecov%2Fcodecov-action.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcodecov%2Fcodecov-action?ref=badge_shield)
 [![Workflow for Codecov Action](https://github.com/codecov/codecov-action/actions/workflows/main.yml/badge.svg)](https://github.com/codecov/codecov-action/actions/workflows/main.yml)
 ### Easily upload coverage reports to Codecov from GitHub Actions
 
->The latest release of this Action adds support for tokenless uploads from GitHub Actions!
-
-## ⚠️  Deprecation of v1
-**As of February 1, 2022, v1 has been fully sunset and no longer functions**
-
-Due to the [deprecation](https://about.codecov.io/blog/introducing-codecovs-new-uploader/) of the underlying bash uploader,
-the Codecov GitHub Action has released `v2`/`v3` which will use the new [uploader](https://github.com/codecov/uploader). You can learn
-more about our deprecation plan and the new uploader on our [blog](https://about.codecov.io/blog/introducing-codecovs-new-uploader/).
-
-We will be restricting any updates to the `v1` Action to security updates and hotfixes.
-
-### Migration from `v1` to `v3`
-The `v3` uploader has a few breaking changes for users
-- Multiple fields have not been transferred from the bash uploader or have been deprecated. Notably
-many of the `functionalities` and `gcov_` arguments have been removed. Please check the documentation
-below for the full list.
+This repo assumes that nx runs tests and reports coverage to `coverage/**/*-final.json`. Each report consistutes a new flag.
 
 ## Usage
 
@@ -36,7 +21,6 @@ steps:
 - uses: codecov/codecov-action@v3
   with:
     token: ${{ secrets.CODECOV_TOKEN }}
-    files: ./coverage1.xml,./coverage2.xml # optional
     flags: unittests # optional
     name: codecov-umbrella # optional
     fail_ci_if_error: true # optional (default = false)
@@ -55,9 +39,8 @@ Codecov's Action supports inputs from the user. These inputs, along with their d
 | `commit_parent` | The commit SHA of the parent for which you are uploading coverage. If not present, the parent will be determined using the API of your repository provider.  When using the repository provider's API, the parent is determined via finding the closest ancestor to the commit. | Optional
 | `dry_run` | Don't upload files to Codecov | Optional
 | `env_vars`  | Environment variables to tag the upload with. Multiple env variables can be separated with commas (e.g. `OS,PYTHON`) | Optional
+| `flags`  | Flag the upload to group coverage metrics (unittests, uitests, etc.). Multiple flags are separated by a comma (ui,chrome). Those will be appended to individual app/lib flag | Optional
 | `fail_ci_if_error`  | Specify if CI pipeline should fail when Codecov runs into errors during upload. *Defaults to **false*** | Optional
-| `files`  | Comma-separated paths to the coverage report(s). Negated paths are supported by starting with `!` | Optional
-| `flags`  | Flag the upload to group coverage metrics (unittests, uitests, etc.). Multiple flags are separated by a comma (ui,chrome) | Optional
 | `full_report` | Specify the path of a full Codecov report to re-upload | Optional
 | `functionalities` | Toggle functionalities | Optional
 | -- `network` | Disable uploading the file network | Optional
@@ -116,14 +99,12 @@ jobs:
         pip install pytest-cov
         pytest --cov=./ --cov-report=xml
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: joinrepublic/codecov-action-nx@main
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        directory: ./coverage/reports/
+        directory: ./coverage//
         env_vars: OS,PYTHON
         fail_ci_if_error: true
-        files: ./coverage1.xml,./coverage2.xml,!./cache
-        flags: unittests
         name: codecov-umbrella
         verbose: true
 ```

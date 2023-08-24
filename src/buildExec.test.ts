@@ -13,7 +13,7 @@ import {version} from '../package.json';
 const context = github.context;
 
 test('no arguments', () => {
-  const {execArgs, failCi} = buildExec();
+  const {execArgs, failCi} = buildExec({ verbose: false });
 
   const args = [
     '-n',
@@ -36,8 +36,6 @@ test('all arguments', () => {
     'dry_run': 'true',
     'env_vars': 'OS,PYTHON',
     'fail_ci_if_error': 'true',
-    'file': 'coverage.xml',
-    'files': 'dir1/coverage.xml,dir2/coverage.xml',
     'flags': 'test,test2',
     'functionalities': 'network',
     'full_report': 'oldDir/oldReport.json',
@@ -72,7 +70,10 @@ test('all arguments', () => {
     process.env['INPUT_' + env.toUpperCase()] = envs[env];
   }
 
-  const {execArgs, failCi} = buildExec();
+  const {execArgs, failCi} = buildExec({ 
+    verbose: true, 
+    files: ['coverage.xml', 'dir1/coverage.xml', 'dir2/coverage.xml']
+  })
   expect(execArgs).toEqual([
     '-n',
     'codecov',
@@ -163,7 +164,10 @@ describe('trim arguments after splitting them', () => {
       process.env['INPUT_' + name.toUpperCase()] = value;
     }
 
-    const {execArgs} = buildExec();
+    const {execArgs} = buildExec({
+      verbose: true, 
+      files: ['./client-coverage.txt  ', './lcov.info']
+    });
 
     expect(execArgs).toEqual(
         expect.arrayContaining([
@@ -187,7 +191,7 @@ describe('trim arguments after splitting them', () => {
       process.env['INPUT_' + name.toUpperCase()] = value;
     }
 
-    const {execArgs} = buildExec();
+    const {execArgs} = buildExec({});
 
     expect(execArgs).toEqual(
         expect.arrayContaining([
@@ -211,7 +215,7 @@ describe('trim arguments after splitting them', () => {
       process.env['INPUT_' + name.toUpperCase()] = value;
     }
 
-    const {execArgs} = buildExec();
+    const {execArgs} = buildExec({});
 
     expect(execArgs).toEqual(
         expect.arrayContaining([
@@ -258,7 +262,7 @@ test('upload args using context', () => {
     '-n',
     '',
   ];
-  const {uploadExecArgs, uploadCommand} = buildUploadExec();
+  const {uploadExecArgs, uploadCommand} = buildUploadExec({});
   if (context.eventName == 'pull_request') {
     expectedArgs.push('-C', `${context.payload.pull_request.head.sha}`);
   }
@@ -276,8 +280,6 @@ test('upload args', () => {
     'dry_run': 'true',
     'env_vars': 'OS,PYTHON',
     'fail_ci_if_error': 'true',
-    'file': 'coverage.xml',
-    'files': 'dir1/coverage.xml,dir2/coverage.xml',
     'flags': 'test,test2',
     'name': 'codecov',
     'override_branch': 'thomasrockhu/test',
@@ -295,7 +297,9 @@ test('upload args', () => {
     process.env['INPUT_' + env.toUpperCase()] = envs[env];
   }
 
-  const {uploadExecArgs, uploadCommand} = buildUploadExec();
+  const {uploadExecArgs, uploadCommand} = buildUploadExec({ 
+    files: ['coverage.xml', 'dir1/coverage.xml', 'dir2/coverage.xml'] 
+  });
   const expectedArgs = [
     '-n',
     'codecov',

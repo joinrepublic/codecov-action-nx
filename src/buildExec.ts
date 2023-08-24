@@ -16,14 +16,13 @@ const isTrue = (variable) => {
   );
 };
 
-const buildExec = () => {
+const buildExec = ({ verbose = false, files = [], flag = null }) => {
   const clean = core.getInput('move_coverage_to_trash');
   const commitParent = core.getInput('commit_parent');
   const dryRun = isTrue(core.getInput('dry_run'));
   const envVars = core.getInput('env_vars');
   const failCi = isTrue(core.getInput('fail_ci_if_error'));
   const file = core.getInput('file');
-  const files = core.getInput('files');
   const flags = core.getInput('flags');
   const fullReport = core.getInput('full_report');
   const functionalities = core.getInput('functionalities');
@@ -35,7 +34,6 @@ const buildExec = () => {
   const name = core.getInput('name');
   const networkFilter = core.getInput('network_filter');
   const networkPrefix = core.getInput('network_prefix');
-  const os = core.getInput('os');
   const overrideBranch = core.getInput('override_branch');
   const overrideBuild = core.getInput('override_build');
   const overrideCommit = core.getInput('override_commit');
@@ -49,12 +47,10 @@ const buildExec = () => {
   const token = core.getInput('token');
   const upstream = core.getInput('upstream_proxy');
   const url = core.getInput('url');
-  const verbose = isTrue(core.getInput('verbose'));
   const workingDir = core.getInput('working-directory');
   const xcode = core.getInput('xcode');
   const xcodeArchivePath = core.getInput('xcode_archive_path');
   const xtraArgs = core.getInput('xtra_args');
-  let uploaderVersion = core.getInput('version');
 
   const execArgs = [];
   execArgs.push(
@@ -110,7 +106,7 @@ const buildExec = () => {
     execArgs.push('-f', `${file}`);
   }
   if (files) {
-    files.split(',').map((f) => f.trim()).forEach((f) => {
+    files.map((f) => f.trim()).forEach((f) => {
       execArgs.push('-f', `${f}`);
     });
   }
@@ -121,6 +117,9 @@ const buildExec = () => {
     flags.split(',').map((f) => f.trim()).forEach((f) => {
       execArgs.push('-F', `${f}`);
     });
+  }
+  if (flag) {
+    execArgs.push('-F', `${flag}`);
   }
 
   if (gcov) {
@@ -199,10 +198,6 @@ const buildExec = () => {
     execArgs.push('--xp', `${xcodeArchivePath}`);
   }
 
-  if (uploaderVersion == '') {
-    uploaderVersion = 'latest';
-  }
-
   if (verbose) {
     console.debug({execArgs});
   }
@@ -215,7 +210,7 @@ const buildExec = () => {
     execArgs.push(`${xtraArgs}`);
   }
 
-  return {execArgs, options, failCi, os, uploaderVersion, verbose};
+  return {execArgs, options, failCi };
 };
 
 const buildCommitExec = () => {
@@ -326,15 +321,13 @@ const buildReportExec = () => {
   return {reportExecArgs, reportOptions, reportCommand};
 };
 
-const buildUploadExec = () => {
+const buildUploadExec = ({ files = [] }) => {
   const envVars = core.getInput('env_vars');
   const dryRun = isTrue(core.getInput('dry_run'));
   const failCi = isTrue(core.getInput('fail_ci_if_error'));
   const file = core.getInput('file');
-  const files = core.getInput('files');
   const flags = core.getInput('flags');
   const name = core.getInput('name');
-  const os = core.getInput('os');
   const overrideBranch = core.getInput('override_branch');
   const overrideBuild = core.getInput('override_build');
   const overrideCommit = core.getInput('override_commit');
@@ -343,7 +336,6 @@ const buildUploadExec = () => {
   const searchDir = core.getInput('directory');
   const slug = core.getInput('slug');
   const token = core.getInput('token');
-  let uploaderVersion = core.getInput('version');
   const workingDir = core.getInput('working-directory');
   const plugin = core.getInput('plugin');
   const exclude = core.getInput('exclude');
@@ -389,7 +381,7 @@ const buildUploadExec = () => {
     uploadExecArgs.push('-f', `${file}`);
   }
   if (files) {
-    files.split(',').map((f) => f.trim()).forEach((f) => {
+    files.map((f) => f.trim()).forEach((f) => {
       uploadExecArgs.push('-f', `${f}`);
     });
   }
@@ -438,23 +430,30 @@ const buildUploadExec = () => {
     uploadExecArgs.push('--exclude', `${exclude}`);
   }
 
-  if (uploaderVersion == '') {
-    uploaderVersion = 'latest';
-  }
-
   return {
     uploadExecArgs,
     uploadOptions,
     failCi,
-    os,
-    uploaderVersion,
     uploadCommand,
   };
 };
 
+const buildUploaderParams = () => {
+  const os = core.getInput('os');
+  const verbose = isTrue(core.getInput('verbose'));
+  let uploaderVersion = core.getInput('version');
+
+  if (uploaderVersion == '') {
+    uploaderVersion = 'latest';
+  }
+
+  return { os, uploaderVersion, verbose };
+}
+
 
 export {
   buildExec,
+  buildUploaderParams,
   buildCommitExec,
   buildGeneralExec,
   buildReportExec,

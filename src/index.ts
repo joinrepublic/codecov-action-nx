@@ -1,10 +1,11 @@
 import * as fs from 'fs';
 import * as https from 'https';
 import * as path from 'path';
+import { glob } from "glob";
 
 import * as exec from '@actions/exec';
 
-import {buildExec} from './buildExec';
+import {buildExec, buildUploaderParams} from './buildExec';
 import {
   getBaseUrl,
   getPlatform,
@@ -17,8 +18,20 @@ import versionInfo from './version';
 
 let failCi;
 
+
+const getNxCoverageReports = () => {
+  glob.sync("coverage/**/*-final.json").map(coverageFilePath => {
+    const fileName = path.basename(coverageFilePath);
+    const qualifiedPath = path.dirname(coverageFilePath).replace("coverage/", "")
+    const flagName = qualifiedPath.replace(/^(libs|apps)\//, "")
+
+    // console.log({ fileName, qualifiedPath, flagName });
+    { fileName, qualifiedPath, flagName, coverageFilePath }
+  })
+}
+
 try {
-  const {execArgs, options, failCi, os, uploaderVersion, verbose} = buildExec();
+  const { os, uploaderVersion, verbose } = buildUploaderParams();
   const platform = getPlatform(os);
 
   const filename = path.join( __dirname, getUploaderName(platform));
@@ -49,15 +62,18 @@ try {
               }
             });
           };
-          await exec.exec(filename, execArgs, options)
-              .catch((err) => {
-                setFailure(
-                    `Codecov: Failed to properly upload: ${err.message}`,
-                    failCi,
-                );
-              }).then(() => {
-                unlink();
-              });
+          Promise.all(getNxCoverageReports().map(({ flagName, coverageFilePath }) => {
+            const {execArgs, options, failCi} = buildExec({ verbose, files: [coverageFilePath], flag: flagName });
+            return exec.exec(filename, execArgs, options)
+                .catch((err) => {
+                  setFailure(
+                      `Codecov: Failed to properly upload: ${err.message}`,
+                      failCi,
+                  );
+                }).then(() => {
+                  unlink();
+                });
+          });
         });
   });
 } catch (err) {
