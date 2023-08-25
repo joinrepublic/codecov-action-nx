@@ -30,6 +30,7 @@ const getNxCoverageReports = ({verbose}) => {
     if (verbose) {
       console.log({
         message: 'Found coverage file',
+        coverageFilePath,
         fileName,
         qualifiedPath,
         flagName,
