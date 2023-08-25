@@ -13,7 +13,7 @@ import {version} from '../package.json';
 const context = github.context;
 
 test('no arguments', () => {
-  const {execArgs, failCi} = buildExec({ verbose: false });
+  const {execArgs, failCi} = buildExec({verbose: false});
 
   const args = [
     '-n',
@@ -70,10 +70,10 @@ test('all arguments', () => {
     process.env['INPUT_' + env.toUpperCase()] = envs[env];
   }
 
-  const {execArgs, failCi} = buildExec({ 
-    verbose: true, 
-    files: ['coverage.xml', 'dir1/coverage.xml', 'dir2/coverage.xml']
-  })
+  const {execArgs, failCi} = buildExec({
+    verbose: true,
+    files: ['coverage.xml', 'dir1/coverage.xml', 'dir2/coverage.xml'],
+  });
   expect(execArgs).toEqual([
     '-n',
     'codecov',
@@ -165,8 +165,8 @@ describe('trim arguments after splitting them', () => {
     }
 
     const {execArgs} = buildExec({
-      verbose: true, 
-      files: ['./client-coverage.txt  ', './lcov.info']
+      verbose: true,
+      files: ['./client-coverage.txt  ', './lcov.info'],
     });
 
     expect(execArgs).toEqual(
@@ -297,8 +297,8 @@ test('upload args', () => {
     process.env['INPUT_' + env.toUpperCase()] = envs[env];
   }
 
-  const {uploadExecArgs, uploadCommand} = buildUploadExec({ 
-    files: ['coverage.xml', 'dir1/coverage.xml', 'dir2/coverage.xml'] 
+  const {uploadExecArgs, uploadCommand} = buildUploadExec({
+    files: ['coverage.xml', 'dir1/coverage.xml', 'dir2/coverage.xml'],
   });
   const expectedArgs = [
     '-n',

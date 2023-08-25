@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as https from 'https';
 import * as path from 'path';
-import { glob } from "glob";
+import {glob} from 'glob';
 
 import * as exec from '@actions/exec';
 
@@ -20,18 +20,18 @@ let failCi;
 
 
 const getNxCoverageReports = () => {
-  glob.sync("coverage/**/*-final.json").map(coverageFilePath => {
+  return glob.sync('coverage/**/*-final.json').map((coverageFilePath) => {
     const fileName = path.basename(coverageFilePath);
-    const qualifiedPath = path.dirname(coverageFilePath).replace("coverage/", "")
-    const flagName = qualifiedPath.replace(/^(libs|apps)\//, "")
+    const qualifiedPath = path.dirname(coverageFilePath).replace('coverage/', '');
+    const flagName = qualifiedPath.replace(/^(libs|apps)\//, '');
 
     // console.log({ fileName, qualifiedPath, flagName });
-    { fileName, qualifiedPath, flagName, coverageFilePath }
-  })
-}
+    return {fileName, qualifiedPath, flagName, coverageFilePath};
+  });
+};
 
 try {
-  const { os, uploaderVersion, verbose } = buildUploaderParams();
+  const {os, uploaderVersion, verbose} = buildUploaderParams();
   const platform = getPlatform(os);
 
   const filename = path.join( __dirname, getUploaderName(platform));
@@ -62,18 +62,20 @@ try {
               }
             });
           };
-          Promise.all(getNxCoverageReports().map(({ flagName, coverageFilePath }) => {
-            const {execArgs, options, failCi} = buildExec({ verbose, files: [coverageFilePath], flag: flagName });
-            return exec.exec(filename, execArgs, options)
-                .catch((err) => {
-                  setFailure(
-                      `Codecov: Failed to properly upload: ${err.message}`,
-                      failCi,
-                  );
-                }).then(() => {
-                  unlink();
-                });
-          });
+          Promise.all(
+              getNxCoverageReports().map(({flagName, coverageFilePath}) => {
+                const {execArgs, options, failCi} = buildExec({verbose, files: [coverageFilePath], flag: flagName});
+                return exec.exec(filename, execArgs, options)
+                    .catch((err) => {
+                      setFailure(
+                          `Codecov: Failed to properly upload: ${err.message}`,
+                          failCi,
+                      );
+                    }).then(() => {
+                      unlink();
+                    });
+              }),
+          );
         });
   });
 } catch (err) {

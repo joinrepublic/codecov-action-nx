@@ -16,7 +16,7 @@ const isTrue = (variable) => {
   );
 };
 
-const buildExec = ({ verbose = false, files = [], flag = null }) => {
+const buildExec = ({verbose = false, files = [], flag = null}) => {
   const clean = core.getInput('move_coverage_to_trash');
   const commitParent = core.getInput('commit_parent');
   const dryRun = isTrue(core.getInput('dry_run'));
@@ -210,7 +210,7 @@ const buildExec = ({ verbose = false, files = [], flag = null }) => {
     execArgs.push(`${xtraArgs}`);
   }
 
-  return {execArgs, options, failCi };
+  return {execArgs, options, failCi};
 };
 
 const buildCommitExec = () => {
@@ -321,7 +321,7 @@ const buildReportExec = () => {
   return {reportExecArgs, reportOptions, reportCommand};
 };
 
-const buildUploadExec = ({ files = [] }) => {
+const buildUploadExec = ({files = []}) => {
   const envVars = core.getInput('env_vars');
   const dryRun = isTrue(core.getInput('dry_run'));
   const failCi = isTrue(core.getInput('fail_ci_if_error'));
@@ -447,8 +447,8 @@ const buildUploaderParams = () => {
     uploaderVersion = 'latest';
   }
 
-  return { os, uploaderVersion, verbose };
-}
+  return {os, uploaderVersion, verbose};
+};
 
 
 export {
