@@ -19,13 +19,22 @@ import versionInfo from './version';
 let failCi;
 
 
-const getNxCoverageReports = () => {
+const getNxCoverageReports = ({verbose}) => {
   return glob.sync('coverage/**/*-final.json').map((coverageFilePath) => {
     const fileName = path.basename(coverageFilePath);
-    const qualifiedPath = path.dirname(coverageFilePath).replace('coverage/', '');
+    const qualifiedPath = path.dirname(
+        coverageFilePath,
+    ).replace('coverage/', '');
     const flagName = qualifiedPath.replace(/^(libs|apps)\//, '');
 
-    // console.log({ fileName, qualifiedPath, flagName });
+    if (verbose) {
+      console.log({
+        message: 'Found coverage file',
+        fileName,
+        qualifiedPath,
+        flagName,
+      });
+    }
     return {fileName, qualifiedPath, flagName, coverageFilePath};
   });
 };
@@ -63,7 +72,7 @@ try {
             });
           };
           Promise.all(
-              getNxCoverageReports().map(({flagName, coverageFilePath}) => {
+              getNxCoverageReports({ verbose }).map(({flagName, coverageFilePath}) => {
                 const {execArgs, options, failCi} = buildExec({verbose, files: [coverageFilePath], flag: flagName});
                 return exec.exec(filename, execArgs, options)
                     .catch((err) => {

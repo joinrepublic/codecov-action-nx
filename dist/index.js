@@ -28040,12 +28040,19 @@ var src_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argu
 
 
 let failCi;
-const getNxCoverageReports = () => {
-    return glob.glob.sync("coverage/**/*-final.json").map(coverageFilePath => {
+const getNxCoverageReports = ({ verbose }) => {
+    return glob.glob.sync('coverage/**/*-final.json').map((coverageFilePath) => {
         const fileName = external_path_.basename(coverageFilePath);
-        const qualifiedPath = external_path_.dirname(coverageFilePath).replace("coverage/", "");
-        const flagName = qualifiedPath.replace(/^(libs|apps)\//, "");
-        // console.log({ fileName, qualifiedPath, flagName });
+        const qualifiedPath = external_path_.dirname(coverageFilePath).replace('coverage/', '');
+        const flagName = qualifiedPath.replace(/^(libs|apps)\//, '');
+        if (verbose) {
+            console.log({
+                message: 'Found coverage file',
+                fileName,
+                qualifiedPath,
+                flagName,
+            });
+        }
         return { fileName, qualifiedPath, flagName, coverageFilePath };
     });
 };
@@ -28072,7 +28079,7 @@ try {
                     }
                 });
             };
-            Promise.all(getNxCoverageReports().map(({ flagName, coverageFilePath }) => {
+            Promise.all(getNxCoverageReports({ verbose }).map(({ flagName, coverageFilePath }) => {
                 const { execArgs, options, failCi } = buildExec({ verbose, files: [coverageFilePath], flag: flagName });
                 return exec.exec(filename, execArgs, options)
                     .catch((err) => {
