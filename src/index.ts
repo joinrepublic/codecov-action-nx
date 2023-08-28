@@ -25,7 +25,7 @@ const getNxCoverageReports = ({verbose}) => {
     const qualifiedPath = path.dirname(
         coverageFilePath,
     ).replace('coverage/', '');
-    const flagName = qualifiedPath.replace(/^(libs|apps)\//, '');
+    const flagName = qualifiedPath.replace(/^(libs|apps)\//, '').replace('/', '.');
 
     if (verbose) {
       console.log({
