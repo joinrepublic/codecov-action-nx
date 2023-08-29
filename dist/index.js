@@ -28044,7 +28044,7 @@ const getNxCoverageReports = ({ verbose }) => {
     return glob.glob.sync('coverage/**/*-final.json').map((coverageFilePath) => {
         const fileName = external_path_.basename(coverageFilePath);
         const qualifiedPath = external_path_.dirname(coverageFilePath).replace('coverage/', '');
-        const flagName = qualifiedPath.replace(/^(libs|apps)\//, '').replace('/', '.');
+        const flagName = qualifiedPath.replace(/^(libs|apps)\//, '').replaceAll('/', '.');
         if (verbose) {
             console.log({
                 message: 'Found coverage file',
